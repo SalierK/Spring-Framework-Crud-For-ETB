@@ -1,7 +1,7 @@
-com\codecraft\Crud_app\SecurityConfiguration$1.class
-com\codecraft\Crud_app\SecurityConfiguration.class
-com\codecraft\Crud_app\repository\TaskRepository.class
-com\codecraft\Crud_app\model\Task.class
-com\codecraft\Crud_app\controller\TaskController.class
-com\codecraft\Crud_app\CrudAppApplication.class
-com\codecraft\Crud_app\service\TaskService.class
+com/codecraft/Crud_app/repository/TaskRepository.class
+com/codecraft/Crud_app/model/Task.class
+com/codecraft/Crud_app/service/CustomUserDetailsService.class
+com/codecraft/Crud_app/controller/TaskController.class
+com/codecraft/Crud_app/SecurityConfiguration.class
+com/codecraft/Crud_app/service/TaskService.class
+com/codecraft/Crud_app/CrudAppApplication.class
