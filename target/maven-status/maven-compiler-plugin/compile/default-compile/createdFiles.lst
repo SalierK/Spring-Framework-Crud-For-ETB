@@ -1,3 +1,4 @@
+com/codecraft/Crud_app/exception/GlobalExceptionHandler.class
 com/codecraft/Crud_app/repository/TaskRepository.class
 com/codecraft/Crud_app/model/Task.class
 com/codecraft/Crud_app/service/CustomUserDetailsService.class

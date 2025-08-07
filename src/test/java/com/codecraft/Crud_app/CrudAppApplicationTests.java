@@ -11,45 +11,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.stereotype.Service;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Service
-@SpringJUnitConfig
 @SpringBootTest
-@EnableMethodSecurity
-
 class CrudAppApplicationTests {
 
     @Autowired
     private TaskService taskService;
-
-    @DynamicPropertySource
-    static void postgresqlProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", () -> "jdbc:postgresql://localhost:5432/crud-db");
-        registry.add("spring.datasource.username", () -> "postgres");
-        registry.add("spring.datasource.password", () -> "postgres");
-    }
 
     @BeforeEach
     public void setUp() {
         Task task1 = new Task();
         task1.setTitle("Task 1");
         task1.setDescription("Description 1");
+        task1.setAsigneedTo("user1");
         task1.setStatus(0);
         taskService.saveTask(task1);
 
         Task task2 = new Task();
         task2.setTitle("Task 2");
         task2.setDescription("Description 2");
+        task2.setAsigneedTo("user2");
         task2.setStatus(1);
         taskService.saveTask(task2);
     }
@@ -93,12 +79,15 @@ class CrudAppApplicationTests {
         Task task = new Task();
         String title = "Test title for creatTask";
         String description = "Test description for creatTask";
-        int status = 654321;
+        String assignedTo = "test user";
+        Integer status = 1; // Changed to valid status range
         task.setTitle(title);
         task.setDescription(description);
+        task.setAsigneedTo(assignedTo);
         task.setStatus(status);
         TaskController taskController = new TaskController(taskService);
-        Task newTask = taskController.createTask(task);
+        ResponseEntity<Task> response = taskController.createTask(task);
+        Task newTask = response.getBody();
         assertEquals(title, taskController.getTaskById(newTask.getId()).getBody().getTitle());
         assertEquals(description, taskController.getTaskById(newTask.getId()).getBody().getDescription());
         assertEquals(status, taskController.getTaskById(newTask.getId()).getBody().getStatus());
@@ -111,18 +100,22 @@ class CrudAppApplicationTests {
         Task task = new Task();
         String title = "Test title for updateTask";
         String description = "Test description for updateTask";
-        int status = 654321;
+        String assignedTo = "test user";
+        Integer status = 1; // Changed to valid status range
         task.setTitle(title);
         task.setDescription(description);
+        task.setAsigneedTo(assignedTo);
         task.setStatus(status);
         TaskController taskController = new TaskController(taskService);
-        Task newTask = taskController.createTask(task);
+        ResponseEntity<Task> response = taskController.createTask(task);
+        Task newTask = response.getBody();
         String newTitle = "New title for updateTask";
         String newDescription = "New description for updateTask";
-        int newStatus = 123456;
+        Integer newStatus = 2; // Changed to valid status range
         Task taskDetails = new Task();
         taskDetails.setTitle(newTitle);
         taskDetails.setDescription(newDescription);
+        taskDetails.setAsigneedTo("updated user");
         taskDetails.setStatus(newStatus);
         Task updatedTask = taskController.updateTask(newTask.getId(), taskDetails).getBody();
         assertEquals(newTitle, updatedTask.getTitle());
@@ -137,14 +130,18 @@ class CrudAppApplicationTests {
         Task task = new Task();
         String title = "Test title for deleteTaskById";
         String description = "Test description for deleteTaskById";
-        int status = 654321;
+        String assignedTo = "test user";
+        Integer status = 1; // Changed to valid status range
         task.setTitle(title);
         task.setDescription(description);
+        task.setAsigneedTo(assignedTo);
         task.setStatus(status);
         TaskController taskController = new TaskController(taskService);
-        Task newTask = taskController.createTask(task);
+        ResponseEntity<Task> response = taskController.createTask(task);
+        Task newTask = response.getBody();
         taskController.deleteTaskById(newTask.getId());
-        assertEquals(null, taskController.getTaskById(newTask.getId()).getBody());
+        ResponseEntity<Task> deletedTaskResponse = taskController.getTaskById(newTask.getId());
+        assertEquals(HttpStatus.NOT_FOUND, deletedTaskResponse.getStatusCode());
     }
 
     @Test
