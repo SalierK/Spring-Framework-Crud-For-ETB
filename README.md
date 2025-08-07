@@ -1,87 +1,143 @@
-# Projeyi Çalıştırma Kılavuzu
+# Spring Boot CRUD Application with Enhanced Security
 
-Projenin tamamı dockerize edilmiş durumdadır. Projeyi ister IntelliJ üzerinden, isterseniz sadece Docker üzerinden çalıştırabilirsiniz. Her iki yöntem için de ilgili adımlar aşağıda verilmiştir.
+This project is a Spring Boot CRUD application that has been secured with comprehensive security measures. The entire project is dockerized and can be run either through IntelliJ or Docker.
 
-## Docker ile Build
+## Security Improvements
 
-1. Maven ile build alın:
+This application has been enhanced with the following security measures:
+
+### 🔒 **Authentication & Authorization**
+- **BCrypt Password Encoding**: Replaced plain text passwords with secure BCrypt hashing
+- **Role-Based Access Control**: Implemented with `@PreAuthorize` annotations
+  - ADMIN role: Full CRUD operations
+  - PERSON role: Read-only access
+- **Method Security**: Enabled Spring Security method-level authorization
+
+### 🛡️ **CSRF Protection**
+- **Enabled CSRF Protection**: Properly configured with cookie-based CSRF tokens
+- **Selective Disabling**: CSRF only disabled for H2 console (development use)
+
+### 🔐 **Input Validation**
+- **Comprehensive Validation**: Added Jakarta validation annotations to all model fields
+- **Size Limits**: Enforced maximum lengths for all string fields
+- **Required Fields**: Validation for mandatory fields
+- **Global Exception Handling**: Proper error responses for validation failures
+
+### 🏗️ **Dependency Security**
+- **Updated Dependencies**: Removed incompatible old Spring Security version
+- **Removed Deprecated APIs**: Eliminated javax.servlet dependencies
+- **Modern Spring Security**: Using Spring Security 6.x compatible configuration
+
+### 🔧 **Infrastructure Security**
+- **H2 Console**: Restricted to ADMIN role only in development
+- **Frame Options**: Configured for same-origin policy
+- **Secure Headers**: Implemented security headers configuration
+
+## User Credentials
+
+Two types of users are available:
+
+| Feature  | Admin User       | Person User      |
+|----------|------------------|------------------|
+| Username | admin            | person           |
+| Password | adminpassword    | personpassword   |
+| Role     | ADMIN            | PERSON           |
+| Create   | ✅               | ❌               |
+| Read     | ✅               | ✅               |
+| Update   | ✅               | ❌               |
+| Delete   | ✅               | ❌               |
+
+> **Note**: These credentials are stored with BCrypt encryption. Access the `CustomUserDetailsService` class in the code for implementation details.
+
+## Running the Project
+
+### Docker Build
+
+1. Build with Maven:
    ```bash
    mvn clean install -DskipTests
    ```
-   > Not: Test aşamalarını Docker üzerinde görmek istiyorsanız `-DskipTests` parametresini kaldırın.
+   > **Note**: Remove `-DskipTests` if you want to run tests during Docker build.
 
-2. Maven ile build aldığınız esnada Lombok hata mesajı alabilirsiniz. Bu durumda JDK versiyonunuzu kontrol edin:
-   - Proje Oracle Open JDK 17 ile geliştirilmiştir
-   - JDK 21 ve 23'te versiyon uyuşmazlıklarından kaynaklanan hatalar mevcuttur
+2. Check JDK version if you encounter Lombok errors:
+   - Project developed with Oracle Open JDK 17
+   - JDK 21 and 23 may have version compatibility issues
 
-3. Docker containerlarını ayağa kaldırın:
-   - Windows için: `Docker Compose Up`
-   - MAC OS için: `Docker-compose up`
+3. Start Docker containers:
+   - Windows: `Docker Compose Up`
+   - macOS: `docker-compose up`
 
-4. Projenin başarıyla çalıştığını kontrol etmek için:
-   - Tarayıcınızdan `localhost:8080/api/tasks` adresine erişin
-   - Spring Security login sayfasını görüyorsanız proje başarıyla çalışıyor demektir
+4. Verify the project is running:
+   - Access `localhost:8080/api/tasks` in your browser
+   - If you see the Spring Security login page, the project is running successfully
 
-## IntelliJ ile Build
+### IntelliJ Build
 
-1. Sadece PostgreSQL'i ayağa kaldırın:
+1. Start only PostgreSQL:
    ```bash
    docker-compose up postgres
    ```
-   > Not: java_app image'inin down olması veya derlenmemiş olması gerekir. Kontrol etmek için `docker ps -a` komutunu kullanın.
+   > **Note**: The java_app image should be down or not compiled. Check with `docker ps -a`.
 
-2. IntelliJ üzerinden:
-   - Projeyi açın
-   - `src/main/java/com.codecraft.Crud_app/CrudAppApplication` dosyasına tıklayın
-   - Üst kısımda bulunan run butonuna basın
-   - Hata almanız durumunda Run/Debug Configurations sayfasından JDK versiyonunuzu kontrol edin
+2. In IntelliJ:
+   - Open the project
+   - Navigate to `src/main/java/com.codecraft.Crud_app/CrudAppApplication`
+   - Click the run button at the top
+   - If you encounter errors, check your JDK version in Run/Debug Configurations
 
-## Postman ile Test
+## Testing with Postman
 
-### Kullanıcı Bilgileri
+### API Operations
 
-İki tip kullanıcı bulunmaktadır:
+All requests are made to `localhost:8080/api/tasks`.
 
-| Özellik  | Admin Kullanıcısı | Person Kullanıcısı |
-|----------|------------------|-------------------|
-| Username | admin            | person            |
-| Password | adminpassword    | personpassword    |
-| Role     | ADMIN            | PERSON            |
-| Create   | ✅               | ❌                |
-| Read     | ✅               | ✅                |
-| Update   | ✅               | ❌                |
-| Delete   | ✅               | ❌                |
-
-> Not: Bu bilgilere kod içerisinde `CustomUserDetailsService` class'ından da erişebilirsiniz.
-
-### API İşlemleri
-
-Tüm istekler `localhost:8080/api/tasks` URL'sine yapılacaktır.
-
-#### CREATE İşlemi
+#### CREATE Operation
 - Method: POST
 - Authentication: Basic Auth
 - Body (raw JSON):
   ```json
   {
-      "title": "test",
-      "description": "test",
-      "status": 5
+      "title": "Sample Task",
+      "description": "Task description",
+      "asigneedTo": "John Doe",
+      "status": 1
   }
   ```
+  > **Note**: Status must be between 0-2 (validated)
 
-#### DELETE İşlemi
-- Method: DELETE
-- URL: `localhost:8080/api/tasks/{id}`
-- Authentication: Basic Auth
-
-#### READ İşlemi
+#### READ Operation
 - Method: GET
 - URL: `localhost:8080/api/tasks`
 - Authentication: Basic Auth
 
-#### UPDATE İşlemi
+#### UPDATE Operation
 - Method: PUT
 - URL: `localhost:8080/api/tasks/{id}`
 - Authentication: Basic Auth
-- Body: Güncellenecek alanları JSON formatında gönderin
+- Body: Send updated fields in JSON format
+
+#### DELETE Operation
+- Method: DELETE
+- URL: `localhost:8080/api/tasks/{id}`
+- Authentication: Basic Auth
+
+## Field Validation Rules
+
+- **Title**: Required, max 200 characters
+- **Assigned To**: Required, max 100 characters  
+- **Description**: Optional, max 1000 characters
+- **Status**: Required, integer between 0-2
+
+## Development & Testing
+
+- **Unit Tests**: 6 comprehensive tests covering all CRUD operations
+- **Test Database**: H2 in-memory database for isolated testing
+- **Security Testing**: Tests include proper role-based access control with `@WithMockUser`
+
+## Error Handling
+
+The application includes a global exception handler that provides meaningful error messages for:
+- Validation failures
+- Constraint violations
+- Authentication errors
+- Authorization failures
